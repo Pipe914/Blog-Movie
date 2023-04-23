@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, query, where } from "firebase/firestore";
 import {db} from '../firebase';
 
 const addToFirebase = async ({ objectToSave }, collectionName) => {
@@ -25,6 +25,22 @@ const getFromFirebase = async (collectionName) => {
   });
   return data;
 };
+
+const queryFromFirebase = async (collectionName, {dataQuery}) => {
+  let data = [];
+  console.log(dataQuery);
+  const querySnapshot = await getDocs(query(collection(db, collectionName), where(dataQuery.field, dataQuery.operator, dataQuery.value)));
+  if (querySnapshot.empty) {
+    console.log("No matching documents.");
+    return querySnapshot;
+  }
+  console.log("Data Recuperada");
+  querySnapshot.forEach((doc) => {
+    data.push(doc.data());
+  });
+  return data;
+};
+
 const updateFromFirebase = async ({objectToSave}, collectionName, idElement) => {
   try{
     const docRef = await updateDoc(collection(db, collectionName, idElement), objectToSave);
@@ -38,6 +54,7 @@ const updateFromFirebase = async ({objectToSave}, collectionName, idElement) => 
     return false;
   }
 };
+
 const deleteFromFirebase = async (idElement, collectionName) => {
   try{
     const docRef = await deleteDoc(collection(db, collectionName, idElement));
@@ -52,4 +69,4 @@ const deleteFromFirebase = async (idElement, collectionName) => {
   }
 };
 
-export { addToFirebase, getFromFirebase, updateFromFirebase, deleteFromFirebase };
+export { addToFirebase, getFromFirebase, queryFromFirebase, updateFromFirebase, deleteFromFirebase };

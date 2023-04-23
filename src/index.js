@@ -11,6 +11,10 @@ import reportWebVitals from './reportWebVitals';
 import BlogList from './BlogList';
 import BlogPost from './BlogPost';
 import Favorites from './Favorites';
+import Login from './components/Login';
+import Register from './components/Register';
+import Reset from './components/Reset';
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -29,6 +33,21 @@ const router = createBrowserRouter([
   },{
     path: "/MyFavorites",
     element: <Favorites />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/LogIn",
+    element: <Login />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/Register",
+    element: <Register />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/ResertPassword",
+    element: <Reset />,
     errorElement: <ErrorPage />,
   },
 
