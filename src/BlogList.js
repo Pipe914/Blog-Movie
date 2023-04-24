@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import "./BlogList.css";
 import { Link } from "react-router-dom";
+import Header from "./components/Header";
 
 function BlogList() {
   const [data, setData] = useState(null);
@@ -39,9 +40,7 @@ function BlogList() {
   } else {
     return (
       <>
-        <div className="App-header">
-          <h1>Blog Movies</h1>
-        </div>
+        <Header />
         <Navbar />
         <div className="movies-cont">
           {data.map((movie) => (

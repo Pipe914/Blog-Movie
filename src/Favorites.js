@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import { Link } from "react-router-dom";
+import { auth } from "./firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 
-import { getFromFirebase } from "./helpers/firebaseHelpers";
+import { queryFromFirebase, deleteFromFirebase } from "./helpers/firebaseHelpers";
+import Header from "./components/Header";
 
 function Favorites() {
   const [data, setData] = useState(null);
   const [favorites, setFavorites] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, loading, errorAuth] = useAuthState(auth);
 
   const apiUrl = "https://imdb-top-100-movies.p.rapidapi.com/";
   const options = {
@@ -20,14 +24,28 @@ function Favorites() {
   };
 
   const getFavoritos = async () => {
-    await getFromFirebase(
-      "Favoritos"
-    );
+    const docs = await queryFromFirebase("Favoritos", {
+      dataQuery: {
+        field: "uid",
+        operator: "==",
+        value: user.uid,
+      },
+    });
+    setFavorites(docs);
+  };
+
+  const deleteFavorite = async (id) => {
+    favorites.map((favorite) => {
+      if (favorite.data.mid === id) {
+        deleteFromFirebase("Favoritos", favorite.id);
+      }
+    });
+
+    setIsLoading(true);
   };
 
   useEffect(() => {
-    setFavorites(getFavoritos());
-    console.log(favorites);
+    getFavoritos();
     fetch(apiUrl, options)
       .then((res) => res.json())
       .then(
@@ -40,40 +58,56 @@ function Favorites() {
           setIsLoading(false);
         }
       );
-      console.log('muchas cosas');
+    console.log("muchas cosas");
   }, [isLoading]);
-
 
   if (isLoading) {
     return <p>Cargando...</p>;
   } else {
-    return (
-      <>
-        <div className="App-header">
-          <h1>Blog Movies</h1>
-        </div>
-        <Navbar />
-        <div className="movies-cont">
-          {data.map((movie) => (
-            <div className="movie-warpper">
-              <Link to={`/BlogPost/${movie.id}`} className="link">
-                <div className="movie-card" id={movie.id}>
-                  <figure>
-                    <img src={movie.image} alt={movie.title} />
-                  </figure>
-                  <div className="movie-info">
-                    <h2>{movie.title}</h2>
-                    <span>{movie.year}</span>
-                    <h3>Overview:</h3>
-                    <p>{movie.description}</p>
+    if (favorites === null) {
+      return (
+        <>
+          <Header />
+          <Navbar />
+          <div className="movies-cont">
+            <p>No tienes favoritos</p>
+          </div>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <Header />
+          <Navbar />
+          <div className="movies-cont">
+            {data.map((movie) =>
+              favorites.map((favorite) =>
+                favorite.data.mid === movie.id ? (
+                  <div className="movie-warpper">
+                    <div className="movie-card" id={movie.id}>
+                      <figure>
+                        <img src={movie.image} alt={movie.title} />
+                      </figure>
+                      <div className="movie-info">
+                        <h2>{movie.title}</h2>
+                        <span>{movie.year}</span>
+                        <h3>Overview:</h3>
+                        <p>{movie.description}</p>
+                      </div>
+                    <button className="buttonNotAdd" onClick={() => deleteFavorite(movie.id)}>
+                      Eliminar
+                    </button>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            </div>
-          ))}
-        </div>
-      </>
-    );
+                ) : (
+                  <></>
+                )
+              )
+            )}
+          </div>
+        </>
+      );
+    }
   }
 }
 

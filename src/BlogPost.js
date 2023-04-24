@@ -2,13 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "./Navbar";
 import "./BlogPost.css";
-import {addToFirebase} from "./helpers/firebaseHelpers";
+import { auth } from "./firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { addToFirebase, queryFromFirebase } from "./helpers/firebaseHelpers";
+import Header from "./components/Header";
 
 function BlogPost() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [id, setId] = useState(useParams().id);
+  const [user, loading, errorAuth] = useAuthState(auth);
 
   const apiUrl = "https://imdb-top-100-movies.p.rapidapi.com/" + id;
   const options = {
@@ -18,8 +22,6 @@ function BlogPost() {
       "X-RapidAPI-Host": "imdb-top-100-movies.p.rapidapi.com",
     },
   };
-
-
 
   useEffect(() => {
     fetch(apiUrl, options)
@@ -40,9 +42,43 @@ function BlogPost() {
 
   const addFavorite = async () => {
     addToFirebase(
-      { objectToSave: {id}},
+      {
+        objectToSave: {
+          uid: user.uid,
+          mid: id,
+          title: data.title,
+        },
+      },
       "Favoritos"
     );
+    alert("Agregado a favoritos");
+  };
+
+  const verifyFavorites = async () => {
+    let exists = false;
+    const docs = await queryFromFirebase("Favoritos", {
+      dataQuery: {
+        field: "uid",
+        operator: "==",
+        value: user.uid,
+      },
+    });
+
+    if (docs === null) {
+      addFavorite();
+      return;
+    } else if (docs.length > 0) {
+      docs.map((doc) => {
+        if (doc.data.mid === id) {
+          alert("Ya esta en favoritos");
+          exists = true;
+          return;
+        }
+      });
+    }
+    if (!exists) {
+      addFavorite();
+    }
   };
 
   if (isLoading) {
@@ -50,9 +86,7 @@ function BlogPost() {
   } else {
     return (
       <>
-        <div className="App-header">
-          <h1>Blog Movies</h1>
-        </div>
+        <Header />
         <Navbar />
         <div className="movies-cont">
           <div className="movie-card" id={data.id}>
@@ -65,8 +99,10 @@ function BlogPost() {
               <h3>Overview:</h3>
               <p>{data.description}</p>
             </div>
+            <button className="buttonAdd" onClick={() => verifyFavorites()}>
+              Add Favorite
+            </button>
           </div>
-          <button onClick={() => addFavorite()}>Add Favorite</button>
         </div>
       </>
     );

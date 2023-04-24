@@ -31,7 +31,7 @@ const router = createBrowserRouter([
     element: <BlogPost />,
     errorElement: <ErrorPage />,
   },{
-    path: "/MyFavorites",
+    path: "/MyFavorite",
     element: <Favorites />,
     errorElement: <ErrorPage />,
   },
