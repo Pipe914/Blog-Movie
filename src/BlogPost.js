@@ -18,8 +18,8 @@ function BlogPost() {
   const options = {
     method: "GET",
     headers: {
-      "X-RapidAPI-Key": "b45078e124msh82f56b3d0a95aebp1d3017jsnbb2eec5a9464",
-      "X-RapidAPI-Host": "imdb-top-100-movies.p.rapidapi.com",
+      "X-RapidAPI-Key": process.env.REACT_APP_API_KEY,
+      "X-RapidAPI-Host": process.env.REACT_APP_API_HOST,
     },
   };
 
