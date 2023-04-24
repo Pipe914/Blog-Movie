@@ -18,7 +18,7 @@ function Favorites() {
   const options = {
     method: "GET",
     headers: {
-      "X-RapidAPI-Key": "16d2fa413cmsh7db5d849e7c2e68p15b1fejsn8411e545c505",
+      "X-RapidAPI-Key": "b45078e124msh82f56b3d0a95aebp1d3017jsnbb2eec5a9464",
       "X-RapidAPI-Host": "imdb-top-100-movies.p.rapidapi.com",
     },
   };
